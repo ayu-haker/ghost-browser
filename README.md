@@ -23,7 +23,7 @@ npm install
 npm start
 ```
 ## For the mobile apk you can dounload this file and fun
-
+<img width="1919" height="868" alt="Screenshot 2025-11-26 035411" src="https://github.com/user-attachments/assets/8f7577c2-e390-4076-94a7-c810b81de574" />
 https://drive.google.com/file/d/19ltrI4PbNSXVLkPUKGq75bhnvt-zKdid/view?usp=sharing
 
 
@@ -36,4 +36,5 @@ https://drive.google.com/file/d/19ltrI4PbNSXVLkPUKGq75bhnvt-zKdid/view?usp=shari
 ## Note
 
 This is a fully functional desktop browser that can load any website!
+
 
