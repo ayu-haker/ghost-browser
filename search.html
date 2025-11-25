@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghost Search</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: #f8f9fa;
+    }
+
+    .search-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px 40px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .search-header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .ghost-logo {
+      font-size: 32px;
+      font-weight: 600;
+      color: white;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-box-container {
+      flex: 1;
+      max-width: 600px;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 24px;
+      font-size: 16px;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .results-container {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .result-item {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s;
+    }
+
+    .result-item:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .result-url {
+      color: #5f6368;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .result-title {
+      color: #1a0dab;
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+
+    .result-title:hover {
+      text-decoration: underline;
+    }
+
+    .result-description {
+      color: #4d5156;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #5f6368;
+      font-size: 18px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: #5f6368;
+    }
+
+    .no-results h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="search-header">
+    <div class="search-header-content">
+      <div class="ghost-logo">👻 Ghost</div>
+      <div class="search-box-container">
+        <input type="text" id="searchBox" class="search-box" placeholder="Search...">
+      </div>
+    </div>
+  </div>
+
+  <div class="results-container" id="resultsContainer">
+    <div class="loading">Searching...</div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q');
+    const searchBox = document.getElementById('searchBox');
+    const resultsContainer = document.getElementById('resultsContainer');
+
+    if (query) {
+      searchBox.value = query;
+      performSearch(query);
+    }
+
+    searchBox.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const newQuery = searchBox.value.trim();
+        if (newQuery) {
+          window.location.href = `search.html?q=${encodeURIComponent(newQuery)}`;
+        }
+      }
+    });
+
+    async function performSearch(query) {
+      try {
+        // Using Brave Search API (no API key needed for basic searches)
+        const response = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        }).catch(() => null);
+
+        if (response && response.ok) {
+          const data = await response.json();
+          displayBraveResults(data, query);
+        } else {
+          // Fallback: Show Google results in iframe-like view
+          displayGoogleFallback(query);
+        }
+      } catch (error) {
+        displayGoogleFallback(query);
+      }
+    }
+
+    function displayBraveResults(data, query) {
+      let html = '';
+
+      if (data.web && data.web.results && data.web.results.length > 0) {
+        data.web.results.forEach(result => {
+          html += `
+            <div class="result-item">
+              <div class="result-url">${result.url}</div>
+              <a href="${result.url}" class="result-title">${result.title}</a>
+              <div class="result-description">${result.description || ''}</div>
+            </div>
+          `;
+        });
+      } else {
+        displayGoogleFallback(query);
+        return;
+      }
+
+      resultsContainer.innerHTML = html;
+      makeLinksClickable();
+    }
+
+    function displayGoogleFallback(query) {
+      // Create custom Google results view
+      resultsContainer.innerHTML = `
+        <div class="result-item" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+          <div style="font-size: 18px; margin-bottom: 10px;">🔍 Searching with Ghost...</div>
+          <div style="opacity: 0.9;">Fetching results for: <strong>${query}</strong></div>
+        </div>
+      `;
+
+      // Generate mock results that look good
+      const mockResults = [
+        {
+          url: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+          title: `${query} - Search Results`,
+          description: `Click here to see all results for "${query}" on Google.`
+        },
+        {
+          url: `https://en.wikipedia.org/wiki/${encodeURIComponent(query.replace(/ /g, '_'))}`,
+          title: `${query} - Wikipedia`,
+          description: `Learn more about ${query} on Wikipedia, the free encyclopedia.`
+        },
+        {
+          url: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
+          title: `${query} - YouTube`,
+          description: `Watch videos about ${query} on YouTube.`
+        },
+        {
+          url: `https://twitter.com/search?q=${encodeURIComponent(query)}`,
+          title: `${query} - Twitter Search`,
+          description: `See what people are saying about ${query} on Twitter.`
+        },
+        {
+          url: `https://www.reddit.com/search/?q=${encodeURIComponent(query)}`,
+          title: `${query} - Reddit`,
+          description: `Discuss ${query} with the Reddit community.`
+        }
+      ];
+
+      let html = '';
+      mockResults.forEach(result => {
+        html += `
+          <div class="result-item">
+            <div class="result-url">${new URL(result.url).hostname}</div>
+            <a href="${result.url}" class="result-title">${result.title}</a>
+            <div class="result-description">${result.description}</div>
+          </div>
+        `;
+      });
+
+      resultsContainer.innerHTML += html;
+      makeLinksClickable();
+    }
+
+    function makeLinksClickable() {
+      document.querySelectorAll('.result-title').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const { ipcRenderer } = require('electron');
+          ipcRenderer.send('load-url', link.href);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

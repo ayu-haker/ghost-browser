@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghost Browser</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      background: white;
+    }
+
+    .browser-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 10px 15px;
+      border-bottom: 2px solid #5a67d8;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      height: 60px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .ghost-logo {
+      font-size: 24px;
+      font-weight: 600;
+      color: white;
+      margin-right: 10px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .nav-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .url-bar {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+    }
+
+    #urlInput {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    #urlInput:focus {
+      background: white;
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .go-btn {
+      padding: 10px 24px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 24px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .go-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .welcome-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: calc(100vh - 60px);
+      text-align: center;
+      padding: 40px;
+    }
+
+    .logo {
+      font-size: 90px;
+      font-weight: 300;
+      color: #5f6368;
+      margin-bottom: 30px;
+      letter-spacing: -2px;
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 584px;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 14px 20px;
+      border: 1px solid #dfe1e5;
+      border-radius: 24px;
+      font-size: 16px;
+      outline: none;
+      transition: box-shadow 0.2s;
+    }
+
+    .search-box:hover {
+      box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+      border-color: rgba(223, 225, 229, 0);
+    }
+
+    .search-box:focus {
+      box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+      border-color: rgba(223, 225, 229, 0);
+    }
+
+    .search-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .search-btn {
+      background: #f8f9fa;
+      border: 1px solid #f8f9fa;
+      border-radius: 4px;
+      color: #3c4043;
+      font-size: 14px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .search-btn:hover {
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+      background: #f8f9fa;
+      border: 1px solid #dadce0;
+      color: #202124;
+    }
+  </style>
+</head>
+<body>
+  <div class="browser-header">
+    <div class="ghost-logo">👻 Ghost</div>
+    <div class="nav-controls">
+      <button class="nav-btn" id="backBtn" title="Back">←</button>
+      <button class="nav-btn" id="forwardBtn" title="Forward">→</button>
+      <button class="nav-btn" id="refreshBtn" title="Refresh">↻</button>
+      <button class="nav-btn" id="homeBtn" title="Home">🏠</button>
+    </div>
+    
+    <div class="url-bar">
+      <input type="text" id="urlInput" placeholder="Search or enter URL...">
+      <button class="go-btn" id="goBtn">Go</button>
+    </div>
+  </div>
+
+  <div class="welcome-screen" id="welcomeScreen">
+    <div class="logo">Ghost</div>
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-box" placeholder="Search or type a URL">
+      <div class="search-buttons">
+        <button class="search-btn" onclick="performSearch()">Ghost Search</button>
+        <button class="search-btn" onclick="feelingLucky()">I'm Feeling Lucky</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
